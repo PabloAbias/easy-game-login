@@ -10,7 +10,6 @@ var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
 var _validator, _encryptionKey, _options, _defaultValues;
 import electron, { app as app$1, BrowserWindow, ipcMain as ipcMain$1, clipboard } from "electron";
-import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import process$1 from "node:process";
@@ -10232,7 +10231,6 @@ class ElectronStore extends Conf {
   }
 }
 const store = new ElectronStore();
-createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 process.env.APP_ROOT = path.join(__dirname, "..");
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
@@ -10273,13 +10271,13 @@ app$1.whenReady().then(createWindow);
 ipcMain$1.on("app:close", () => {
   app$1.quit();
 });
-ipcMain$1.on("storage:save", (event, { key, value }) => {
+ipcMain$1.on("storage:save", (_event, { key, value }) => {
   store.set(key, value);
 });
-ipcMain$1.handle("storage:get", (event, key) => {
+ipcMain$1.handle("storage:get", (_event, key) => {
   return store.get(key);
 });
-ipcMain$1.on("clipboard:copy", (event, text) => {
+ipcMain$1.on("clipboard:copy", (_event, text) => {
   clipboard.writeText(text);
   setTimeout(() => {
     clipboard.clear();

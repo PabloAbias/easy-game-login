@@ -1,11 +1,9 @@
 import { app, BrowserWindow, ipcMain, clipboard } from "electron";
-import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import Store from "electron-store";
 const store = new Store();
 
-const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 process.env.APP_ROOT = path.join(__dirname, "..");
@@ -61,16 +59,16 @@ ipcMain.on("app:close", () => {
 });
 
 // Salvar no storage
-ipcMain.on("storage:save", (event, { key, value }) => {
+ipcMain.on("storage:save", (_event, { key, value }) => {
   store.set(key, value);
 });
 
 // Ler do storage
-ipcMain.handle("storage:get", (event, key) => {
+ipcMain.handle("storage:get", (_event, key) => {
   return store.get(key);
 });
 
-ipcMain.on("clipboard:copy", (event, text) => {
+ipcMain.on("clipboard:copy", (_event, text) => {
   clipboard.writeText(text);
 
   setTimeout(() => {

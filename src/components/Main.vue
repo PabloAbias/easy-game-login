@@ -14,7 +14,7 @@ function attTudo() {
 }
 
 async function getDados() {
-  dados.value = await window.electronAPI.getData("usuario");
+  dados.value = await window.electronAPI.getData("usuario")|| [];
 }
 
 async function novoItem() {
@@ -22,6 +22,7 @@ async function novoItem() {
     email: "",
     senha: "",
     nome: "",
+    otpSecret: "",
     id: Date.now(),
   };
 
