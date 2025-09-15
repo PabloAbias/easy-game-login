@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, clipboard } from "electron";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -68,4 +68,12 @@ ipcMain.on("storage:save", (event, { key, value }) => {
 // Ler do storage
 ipcMain.handle("storage:get", (event, key) => {
   return store.get(key);
+});
+
+ipcMain.on("clipboard:copy", (event, text) => {
+  clipboard.writeText(text);
+
+  setTimeout(() => {
+    clipboard.clear();
+  }, 20000);
 });

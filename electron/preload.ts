@@ -10,6 +10,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   // Ler dados do storage
   getData: (key: string) => ipcRenderer.invoke("storage:get", key),
+
+  copyToClipboard: (text: string) => ipcRenderer.send("clipboard:copy", text),
 });
 
 contextBridge.exposeInMainWorld("ipcRenderer", {

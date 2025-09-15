@@ -6,7 +6,8 @@ electron.contextBridge.exposeInMainWorld("electronAPI", {
   // Salvar dados no storage
   saveData: (key, value) => electron.ipcRenderer.send("storage:save", { key, value }),
   // Ler dados do storage
-  getData: (key) => electron.ipcRenderer.invoke("storage:get", key)
+  getData: (key) => electron.ipcRenderer.invoke("storage:get", key),
+  copyToClipboard: (text) => electron.ipcRenderer.send("clipboard:copy", text)
 });
 electron.contextBridge.exposeInMainWorld("ipcRenderer", {
   on(...args) {
