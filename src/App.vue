@@ -21,5 +21,10 @@ function fecharApp() {
       </button>
     </div>
     <Main />
+    <div class='p-2 flex'>
+      <small><b>v1.0.0</b> </small>
+      <div class='flex-1'></div>
+      <div>Criado por <b>Pablo Abias</b> </div>
+    </div>
   </div>
 </template>
