@@ -12,6 +12,14 @@ contextBridge.exposeInMainWorld("electronAPI", {
   getData: (key: string) => ipcRenderer.invoke("storage:get", key),
 
   copyToClipboard: (text: string) => ipcRenderer.send("clipboard:copy", text),
+  exportToClipboard: (text: string) => ipcRenderer.send("clipboard:export", text),
+
+  importData: () => ipcRenderer.invoke("clipboard:get"),
+
+  showOverlay: () => ipcRenderer.invoke("show-overlay"),
+  hideOverlay: () => ipcRenderer.invoke("hide-overlay"),
+
+  onNumero: (callback: any) => ipcRenderer.on("set-numero", (_event) => callback()),
 });
 
 contextBridge.exposeInMainWorld("ipcRenderer", {

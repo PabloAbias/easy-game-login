@@ -1,14 +1,19 @@
 <script setup>
-import { Cog8ToothIcon, ClipboardIcon } from "@heroicons/vue/24/solid";
+import {
+  Cog8ToothIcon,
+  ClipboardIcon,
+  ArrowDownTrayIcon,
+  ArrowUpTrayIcon,
+} from "@heroicons/vue/24/solid";
 import { ref } from "vue";
 import { TOTP, Secret } from "otpauth";
 
-const audioUrl = new URL('@/assets/notificacao.mp3', import.meta.url)
+const audioUrl = new URL("@/assets/notificacao.mp3", import.meta.url);
 
 const totp = new TOTP({
-  algorithm: 'SHA1',
+  algorithm: "SHA1",
   digits: 6,
-  period: 30
+  period: 30,
 });
 
 const props = defineProps({
@@ -22,6 +27,10 @@ const props = defineProps({
   },
   delay: {
     type: Number,
+    required: true,
+  },
+  mostrarAvisoSucessoImport: {
+    type: Function,
     required: true,
   },
 });
@@ -59,16 +68,31 @@ function PlayNotify() {
   audio.play();
 }
 
+
+function ShowOverlay() {
+  window.electronAPI.showOverlay();
+}
+function HideOverlay() {
+  window.electronAPI.hideOverlay();
+}
+
 async function copiarTudo() {
-  await new Promise((resolve) => setTimeout(resolve, props.delay * 0.5));
-  PlayNotify()
+  ShowOverlay()
+  await new Promise((resolve) => setTimeout(resolve, props.delay));
+
+  PlayNotify();
   copiarEmail();
   await new Promise((resolve) => setTimeout(resolve, props.delay));
-  PlayNotify()
+
+  PlayNotify();
   copiarSenha();
   await new Promise((resolve) => setTimeout(resolve, props.delay));
-  PlayNotify()
+
+  PlayNotify();
   copiarOTP();
+  await new Promise((resolve) => setTimeout(resolve, props.delay));
+
+  HideOverlay();
 }
 
 function copiarEmail() {
@@ -87,9 +111,15 @@ function copiarOTP() {
 async function puxarDados(params) {
   return await window.electronAPI.getData("usuario");
 }
+
 async function setDados(dados) {
   window.electronAPI.saveData("usuario", dados);
   props.attTudo();
+}
+
+async function exportar() {
+  window.electronAPI.exportToClipboard(JSON.stringify(props.dado));
+  props.mostrarAvisoSucessoImport()
 }
 
 async function salvarDados() {
@@ -123,25 +153,34 @@ async function deletar() {
 </script>
 
 <template>
-  <div class="border rounded p-2 flex flex-col">
+  <div class="border rounded p-2 flex flex-col border-zinc-800">
     <div class="flex-1 flex items-center">
       <div class="flex gap-2">
-        <b>Usuário: </b>
-        {{ dado.nome }}
+        <b class="text-zinc-600">Usuário: </b>
+        <span class="text-sky-400">{{ dado.nome }}</span>
       </div>
       <div class="flex-1"></div>
       <div class="flex gap-3">
         <button
-          class="border rounded p-1 border-purple-600"
+          class="border rounded p-1 border-pink-600"
+          @click="exportar"
+          title="Exportar Dados"
+        >
+          <ArrowUpTrayIcon class="w-3 h-3 text-pink-600" />
+        </button>
+        <div></div>
+        <button
+          class="border rounded p-1 border-purple-400"
           @click="configurar"
         >
-          <Cog8ToothIcon class="w-3 h-3 text-purple-600" />
+          <Cog8ToothIcon class="w-3 h-3 text-purple-400" />
         </button>
         <button class="border rounded p-1 border-cyan-600" @click="copiarTudo">
-          <ClipboardIcon class="w-3 h-3 text-cyan-600" />
+          <ClipboardIcon class="w-3 h-3 text-sky-400" />
         </button>
       </div>
     </div>
+
     <div v-if="showConfig" class="flex flex-col gap-3 p-4">
       <div class="flex flex-col">
         <label for="" class="text-xs">Nome de Usuário</label>

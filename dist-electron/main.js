@@ -9,7 +9,7 @@ var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read fr
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
 var _validator, _encryptionKey, _options, _defaultValues;
-import electron, { app as app$1, BrowserWindow, ipcMain as ipcMain$1, clipboard } from "electron";
+import electron, { app as app$1, BrowserWindow, ipcMain as ipcMain$1, clipboard, screen } from "electron";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import process$1 from "node:process";
@@ -10238,6 +10238,40 @@ const MAIN_DIST = path.join(process.env.APP_ROOT, "dist-electron");
 const RENDERER_DIST = path.join(process.env.APP_ROOT, "dist");
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, "public") : RENDERER_DIST;
 let win;
+let overlayAberto;
+function createOverlayWindow() {
+  const { width: screenWidth } = screen.getPrimaryDisplay().workAreaSize;
+  const windowWidth = 100;
+  const windowHeight = 50;
+  const x = Math.floor((screenWidth - windowWidth) / 2);
+  const y = 10;
+  overlayAberto = new BrowserWindow({
+    width: windowWidth,
+    height: windowHeight,
+    x,
+    y,
+    alwaysOnTop: true,
+    frame: false,
+    transparent: true,
+    skipTaskbar: true,
+    resizable: false,
+    webPreferences: {
+      preload: path.join(__dirname, "preload.mjs")
+    }
+  });
+  overlayAberto.setAlwaysOnTop(true, "screen-saver");
+  overlayAberto.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  overlayAberto.setFullScreenable(false);
+  overlayAberto.moveTop();
+  if (VITE_DEV_SERVER_URL) {
+    overlayAberto.loadURL(VITE_DEV_SERVER_URL + "overlay");
+  } else {
+    overlayAberto.loadFile(path.join(RENDERER_DIST, "overlay.html"));
+  }
+  overlayAberto.on("closed", () => {
+    overlayAberto = void 0;
+  });
+}
 function createWindow() {
   win = new BrowserWindow({
     frame: false,
@@ -10279,9 +10313,23 @@ ipcMain$1.handle("storage:get", (_event, key) => {
 });
 ipcMain$1.on("clipboard:copy", (_event, text) => {
   clipboard.writeText(text);
-  setTimeout(() => {
-    clipboard.clear();
-  }, 2e4);
+  overlayAberto == null ? void 0 : overlayAberto.webContents.send("set-numero");
+});
+ipcMain$1.on("clipboard:export", (_event, text) => {
+  const base64 = Buffer.from(text).toString("base64");
+  clipboard.writeText(base64);
+});
+ipcMain$1.handle("show-overlay", () => {
+  createOverlayWindow();
+  console.log(overlayAberto);
+});
+ipcMain$1.handle("hide-overlay", () => {
+  overlayAberto == null ? void 0 : overlayAberto.close();
+});
+ipcMain$1.handle("clipboard:get", async (_event) => {
+  const textFromClipboard = await clipboard.readText();
+  const base64 = Buffer.from(textFromClipboard, "base64").toString("utf-8");
+  return base64;
 });
 export {
   MAIN_DIST,

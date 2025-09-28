@@ -7,7 +7,12 @@ electron.contextBridge.exposeInMainWorld("electronAPI", {
   saveData: (key, value) => electron.ipcRenderer.send("storage:save", { key, value }),
   // Ler dados do storage
   getData: (key) => electron.ipcRenderer.invoke("storage:get", key),
-  copyToClipboard: (text) => electron.ipcRenderer.send("clipboard:copy", text)
+  copyToClipboard: (text) => electron.ipcRenderer.send("clipboard:copy", text),
+  exportToClipboard: (text) => electron.ipcRenderer.send("clipboard:export", text),
+  importData: () => electron.ipcRenderer.invoke("clipboard:get"),
+  showOverlay: () => electron.ipcRenderer.invoke("show-overlay"),
+  hideOverlay: () => electron.ipcRenderer.invoke("hide-overlay"),
+  onNumero: (callback) => electron.ipcRenderer.on("set-numero", (_event) => callback())
 });
 electron.contextBridge.exposeInMainWorld("ipcRenderer", {
   on(...args) {
